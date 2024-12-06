@@ -20,8 +20,9 @@ namespace Util
 
 			// Tip
 			Vector3 tipBack = tip - arrow.normalized * HeadLength;
-			Vector3 perpendicular1 = new Vector3(-arrow.y, arrow.x, arrow.z).normalized * HeadRadius;
-			Vector3 perpendicular2 = Vector3.Cross(arrow, perpendicular1).normalized * HeadRadius;
+			Quaternion lookRot = arrow == Vector3.zero ? Quaternion.identity : Quaternion.LookRotation(arrow);
+			Vector3 perpendicular1 = lookRot * Vector3.right * HeadRadius;
+			Vector3 perpendicular2 = lookRot * Vector3.up * HeadRadius;
 
 			Gizmos.DrawLine(tipBack, tipBack + perpendicular1);
 			Gizmos.DrawLine(tip, tipBack + perpendicular1);
