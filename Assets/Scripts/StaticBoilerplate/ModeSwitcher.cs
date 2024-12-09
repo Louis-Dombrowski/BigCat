@@ -7,6 +7,13 @@ using Random = System.Random;
 
 public class ModeSwitcher : MonoBehaviour
 {
+	public enum Mode
+	{
+		Null,
+		Edit,
+		Play
+	}
+	
 	public static ModeSwitcher instance;
 	
 	[Header("Properties")]
@@ -15,17 +22,26 @@ public class ModeSwitcher : MonoBehaviour
 	[SerializeField] private List<GameObject> editMode;
 	[Tooltip("Objects that should only be active in Play Mode")]
 	[SerializeField] private List<GameObject> playMode;
+
+	[Header("State")]
+	[SerializeField] private Mode mode = Mode.Null;
 	
 	private void Start()
 	{
 		if(instance != null) Destroy(instance);
 		instance = this;
-
+		
 		EnterEditMode();
 	}
 	
 	public async void EnterEditMode()
 	{
+		if (mode != Mode.Play && mode != Mode.Null)
+		{
+			if(mode == Mode.Edit) Debug.LogWarning("Tried to enter edit mode while already editing");
+			return;
+		}
+		
 		string reloadableName = levelName + "_Reloadable";
 		
 		// Check if the Reloadable portion of this scene is loaded. If it is, reload it
@@ -39,11 +55,20 @@ public class ModeSwitcher : MonoBehaviour
 		
 		foreach (var g in instance.editMode) g.SetActive(true);
 		foreach (var g in instance.playMode) g.SetActive(false);
-}
+
+		mode = Mode.Edit;
+	}
 
 	// When entering play mode from edit mode, the reloadable scene will always be loaded.
 	public void EnterPlayMode()
 	{
+		if (mode != Mode.Edit)
+		{
+			if(mode == Mode.Play) Debug.LogWarning("Tried to enter play mode while already playing");
+			if(mode == Mode.Null) Debug.LogWarning("Tried to enter play mode before edit mode");
+			return;
+		}
+		
 		GuiData.instance.score = 0;
 		
 		foreach (var g in instance.editMode) g.SetActive(false);
@@ -56,8 +81,20 @@ public class ModeSwitcher : MonoBehaviour
 		{
 			Instantiate(src.GetChild(i).gameObject, dst, true).SetActive(true);
 		}
+
+		mode = Mode.Play;
 	}
 
+	public static bool IsPlaying()
+	{
+		return instance.mode == Mode.Play;
+	}
+
+	public static bool IsEditing()
+	{
+		return instance.mode == Mode.Edit;
+	}
+	
 	public void QuitGame()
 	{
 		Application.Quit();

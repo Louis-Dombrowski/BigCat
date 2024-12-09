@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Unity.TubeRenderer;
 using UnityEngine;
 
 public class YarnBall : BaseCard
@@ -13,7 +12,7 @@ public class YarnBall : BaseCard
     
     [Header("Parts")]
     [SerializeField] private SphereCollider ball;
-    [SerializeField] private TubeRenderer yarn;
+    [SerializeField] private TubeMesh yarn;
     [SerializeField] private Transform ballModel;
     [SerializeField] private Distraction distraction;
     [Header("Properties")]
@@ -36,27 +35,29 @@ public class YarnBall : BaseCard
     
     void Start()
     {
-        transform.rotation = Quaternion.identity; // orientation doesnt matter for this object, and it messes with the tube renderer
-
         radiusRange.max = radius;
         maxLength = maxLengthPerRadius * radius;
         
         SetRadius(radius);
-        
-        prevPos = ball.transform.position;
-        prevDir = Vector3.zero;
-        
-        AddYarnPoint(prevPos);
-        AddYarnPoint(prevPos);
     }
 
     void FixedUpdate()
     {
+        if (ModeSwitcher.IsEditing()) return;
+
+        if (yarn.points.Length < 2)
+        {
+            AddYarnPoint(ball.transform.position);
+            AddYarnPoint(ball.transform.position);
+            
+            prevPos = ball.transform.position;
+            prevDir = Vector3.zero;
+        }
+        
         if (ballExists)
         {
-            yarn.transform.localPosition = -transform.position;
             //                                     \/ This only approximates the extra length, it will likely cause slight jumps
-            float percentSize = 1 - (yarnLength + (ball.transform.position - yarn.positions[^1]).magnitude) / maxLength;
+            float percentSize = 1 - (yarnLength + (ball.transform.position - yarn.points[^1]).magnitude) / maxLength;
             float radius = radiusRange.Lerp(percentSize);
             SetRadius(radius);
             distraction.strength = distractionWeightRange.Lerp(percentSize);
@@ -71,7 +72,7 @@ public class YarnBall : BaseCard
 
             Vector3 yarnPoint = ball.transform.position + Vector3.down * radius;
             // Make the end of the string track the ball
-            yarn.positions[^1] = yarnPoint;
+            yarn.points[^1] = yarnPoint;
 
             // Add new points if necessary
             Vector3 delta = ball.transform.position - prevPos;
@@ -91,8 +92,11 @@ public class YarnBall : BaseCard
         }
 
         if (!ballExists && simulatedPoints.Count == 0) Destroy(this);
-        
-        SimulatePoints();
+        else
+        {
+            SimulatePoints();
+            yarn.UpdateMesh();
+        }
     }
 
     private void SimulatePoints()
@@ -103,7 +107,7 @@ public class YarnBall : BaseCard
             var p = simulatedPoints[i];
 
             // Dont continue simulating this point if it has hit the ground. Ground colliders should (hopefully) be static.
-            var overlaps = Physics.OverlapSphere(yarn.positions[p.idx], yarn.startWidth, LayerMask.GetMask("Ground"));
+            var overlaps = Physics.OverlapSphere(yarn.points[p.idx], yarn.radius, LayerMask.GetMask("Ground"));
             if (overlaps.Length > 0)
             {
                 simulatedPoints.RemoveAt(i);
@@ -111,16 +115,16 @@ public class YarnBall : BaseCard
             }
 
             p.velocity += Physics.gravity.y * Time.deltaTime;
-            yarn.positions[p.idx] += Vector3.up * (p.velocity * Time.deltaTime);
+            yarn.points[p.idx] += Vector3.up * (p.velocity * Time.deltaTime);
             simulatedPoints[i] = p;
         }
     }
 
     private void AddYarnPoint(Vector3 p)
     {
-        List<Vector3> oldPoints = new(yarn.positions);
+        List<Vector3> oldPoints = new(yarn.points);
         oldPoints.Add(p);
-        yarn.SetPositions(oldPoints.ToArray());
+        yarn.points = oldPoints.ToArray();
 
         var simData = new YarnPoint();
         simData.idx = oldPoints.Count - 1;
