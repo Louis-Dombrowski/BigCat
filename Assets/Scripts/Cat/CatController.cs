@@ -53,11 +53,12 @@ public class CatController : MonoBehaviour
 	[SerializeField] private Transform destination;
 	[SerializeField] private Transform target;
 	[SerializeField] private Transform bodyCenterOfMass;
-	[SerializeField] private Transform body;
+	[FormerlySerializedAs("body")] [SerializeField] private Transform torsoBack;
+	[SerializeField] private Transform ikTorsoBack;
 	[SerializeField] private Transform neck;
 	[SerializeField] private Transform head;
-	[SerializeField] private Transform front;
-	[SerializeField] private Transform back;
+	[FormerlySerializedAs("front")] [SerializeField] private Transform torsoFront;
+	[SerializeField] private Transform ikTorsoFront;
 	[SerializeField] private CatLeg frontRightLeg;
 	[SerializeField] private CatLeg backRightLeg;
 	[SerializeField] private CatLeg backLeftLeg;
@@ -101,7 +102,7 @@ public class CatController : MonoBehaviour
 	void Start()
 	{
 		lookApprox.Initialize(Quaternion.identity);
-		heightApprox.Initialize(body.position.y);
+		heightApprox.Initialize(torsoBack.position.y);
 		
 		if (instance != null)
 		{
@@ -113,7 +114,7 @@ public class CatController : MonoBehaviour
 		// This has to be done in Start, because the legs find their offsets in Awake
 		Quaternion bodyRot = transform.rotation;
 		transform.rotation = Quaternion.identity;
-		body.rotation = bodyRot;
+		torsoBack.rotation = bodyRot;
 
 		// Initialize paw positions
 		var legs = GetComponentsInChildren<CatLeg>();
@@ -134,7 +135,7 @@ public class CatController : MonoBehaviour
 		}
 		if (interestState == InterestState.Running) // Stop running once you've reached your target
 		{
-			if (Distance2D(body.position, target.position) < straightStrideLength.max * 2) interestState = InterestState.Bored;
+			if (Distance2D(torsoBack.position, target.position) < straightStrideLength.max * 2) interestState = InterestState.Bored;
 		}
 		
 		if(interestState != InterestState.Startled && interestState != InterestState.Running) // Don't update interests while scared
@@ -154,7 +155,7 @@ public class CatController : MonoBehaviour
 		// Update highscore
 		if (interestState == InterestState.Roaming)
 		{
-			if (Distance2D(body.position, target.position) < straightStrideLength.max)
+			if (Distance2D(torsoBack.position, target.position) < straightStrideLength.max)
 			{
 				GuiData.instance.UpdateHighScore();
 				interestState = InterestState.LevelComplete;
@@ -170,9 +171,9 @@ public class CatController : MonoBehaviour
 		
 		if(stepState == StepState.Grounded && pathWaypoints.Count > 0) // Begin animating towards the next point
 		{
-			Vector3 prevWaypoint = body.position;
+			Vector3 prevWaypoint = torsoBack.position;
 			
-			prevRotation = body.rotation;
+			prevRotation = torsoBack.rotation;
 			
 			Vector3 nextWaypoint = pathWaypoints[0].pos;
 			nextWaypoint = new(nextWaypoint.x, prevWaypoint.y, nextWaypoint.y);
@@ -184,7 +185,7 @@ public class CatController : MonoBehaviour
 			startHeight /= 4;
 			startHeight += height;
 			
-			float angle = Vector3.SignedAngle(body.forward, nextWaypoint - prevWaypoint, Vector3.up);
+			float angle = Vector3.SignedAngle(torsoBack.forward, nextWaypoint - prevWaypoint, Vector3.up);
 			tgtQuat = Quaternion.Euler(0, angle, 0);
 			
 			stepState = StepState.Stepping;
@@ -267,19 +268,23 @@ public class CatController : MonoBehaviour
 
 			if (!halfwayThrough)
 			{
-				front.localRotation = Quaternion.Slerp(Quaternion.identity, tgtQuat, percentThroughHalf);
+				torsoFront.localRotation = Quaternion.Slerp(Quaternion.identity, tgtQuat, percentThroughHalf);
+				ikTorsoFront.localRotation = torsoFront.localRotation;
 			}
 			else
 			{
-				front.localRotation = Quaternion.Slerp(tgtQuat, Quaternion.identity, percentThroughHalf);
-				body.localRotation = prevRotation * Quaternion.Slerp(Quaternion.identity, tgtQuat, percentThroughHalf);
+				torsoFront.localRotation = Quaternion.Slerp(tgtQuat, Quaternion.identity, percentThroughHalf);
+				ikTorsoFront.rotation = torsoFront.rotation;
+				torsoBack.localRotation = prevRotation * Quaternion.Slerp(Quaternion.identity, tgtQuat, percentThroughHalf);
+				ikTorsoBack.rotation = torsoBack.rotation;
 			}
 
 			float percent = stepStopwatch.progress;
 
 			//print((body.position - currentPath.Position(percent)).magnitude);
 			
-			body.position = currentPath.Position(percent);
+			torsoBack.position = currentPath.Position(percent);
+			ikTorsoBack.position = torsoBack.position;
 
 			if (percent >= 1)
 			{
@@ -301,7 +306,7 @@ public class CatController : MonoBehaviour
 		{
 			bool uninteresting = targetDistraction.strength < interestThreshold;
 
-			Vector2 bodyPos = new(body.transform.position.x, body.transform.position.z);
+			Vector2 bodyPos = new(torsoBack.transform.position.x, torsoBack.transform.position.z);
 			Vector2 tgtPos = new(targetDistraction.transform.position.x, targetDistraction.transform.position.z);
 			bool tooClose = (bodyPos - tgtPos).magnitude < proximityThreshold;
 
@@ -352,7 +357,7 @@ public class CatController : MonoBehaviour
 	private void LookToTarget()
 	{
 		Vector3 toTarget = (target.position - neck.position);
-		Quaternion towardsTarget = Quaternion.LookRotation(body.InverseTransformDirection(toTarget.normalized)); // Local rotation
+		Quaternion towardsTarget = Quaternion.LookRotation(torsoBack.InverseTransformDirection(toTarget.normalized)); // Local rotation
 		
 		Quaternion lookDir = Quaternion.RotateTowards(Quaternion.identity, towardsTarget, lookAngle);
 
@@ -383,8 +388,8 @@ public class CatController : MonoBehaviour
 	{
 		List<Waypoint> waypoints = new();
 
-		Vector2 fwd = new (body.forward.x, body.forward.z); // unit vector
-		Vector2 pos = new (body.position.x, body.position.z); // world pos
+		Vector2 fwd = new (torsoBack.forward.x, torsoBack.forward.z); // unit vector
+		Vector2 pos = new (torsoBack.position.x, torsoBack.position.z); // world pos
 		Vector2 tgt = new (target.position.x, target.position.z); // world pos
 		
 		bool needsToTurn = Vector2.Angle(tgt - pos, fwd) > turnAngle;
