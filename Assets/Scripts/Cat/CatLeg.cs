@@ -14,9 +14,6 @@ public class CatLeg : MonoBehaviour
 	[SerializeField] private Transform thigh;
 	[SerializeField] private Transform calf;
 	[SerializeField] private Transform paw;
-	[SerializeField] private Transform ikThigh;
-	[SerializeField] private Transform ikCalf;
-	[SerializeField] private Transform ikPaw;
 	[SerializeField] private Transform pawHome;
 	
 	[Header("Properties")]
@@ -90,29 +87,19 @@ public class CatLeg : MonoBehaviour
 		thigh.rotation = Quaternion.LookRotation(thighV);
 		thigh.position = hip.position;
 		thigh.localScale = new(1, 1, L);
-		ikThigh.rotation = thigh.rotation;
-		ikThigh.position = thigh.position;
-		
+
 		calf.rotation = Quaternion.LookRotation(calfV);
 		calf.position = hip.position + thighV;
 		calf.localScale = new(1, 1, l);
-		ikCalf.rotation = calf.rotation;
-		ikCalf.position = calf.position;
 		
 		paw.rotation = Quaternion.LookRotation(hip.forward);
-		ikPaw.rotation = paw.rotation;
 	}
 
 	void UpdatePawHome()
 	{
 		pawHome.position = hip.TransformPoint(pawHomeOffset);
 	}
-
-	private void MovePaw(Vector3 newPos)
-	{
-		paw.position = newPos;
-		ikPaw.position = paw.position;
-	}
+	
 	private Vector3 FindFoothold(Vector3 delta)
 	{
 		Vector3 origin = pawHome.position + delta;
@@ -146,8 +133,8 @@ public class CatLeg : MonoBehaviour
 		{
 			t += Time.deltaTime / animationLength;
 			float eased = (2 * t) / (t * t + 1);
-			MovePaw(path.Position(eased));
-			
+			paw.position = path.Position(eased);
+
 			yield return null;
 		}
 		
@@ -157,7 +144,7 @@ public class CatLeg : MonoBehaviour
 	public void TeleportHome()
 	{
 		UpdatePawHome();
-		MovePaw(FindFoothold(Vector3.zero));
+		paw.position = FindFoothold(Vector3.zero);
 		target = paw.position;
 	}
 
