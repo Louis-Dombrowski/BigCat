@@ -158,6 +158,7 @@ public class CatController : MonoBehaviour
 			{
 				GuiData.instance.UpdateHighScore();
 				interestState = InterestState.LevelComplete;
+				Sfx.PlaySound(Sfx.ClipId.LevelComplete);
 			}
 		} 
 		

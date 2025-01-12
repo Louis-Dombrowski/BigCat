@@ -2192,7 +2192,9 @@ MonoBehaviour:
   explosionForce: 40
   randomForce: 10
   despawnDelay: 30
+  destroySound: 3
   parts: []
+  hasBeenKicked: 0
 --- !u!1 &5658414514996733309
 GameObject:
   m_ObjectHideFlags: 0

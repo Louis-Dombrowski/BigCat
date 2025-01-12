@@ -139,6 +139,7 @@ public class CatLeg : MonoBehaviour
 		}
 		
 		if(onStepFinish != null) onStepFinish();
+		Sfx.PlaySound(Sfx.ClipId.CatFootstep, paw.position);
 	}
 
 	public void TeleportHome()

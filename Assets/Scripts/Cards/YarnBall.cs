@@ -65,6 +65,7 @@ public class YarnBall : BaseCard
             if (percentSize <= 0)
             {
                 Instantiate(poofVFX, ball.transform.position, Quaternion.identity, transform);
+                Sfx.PlaySound(Sfx.ClipId.Pop, ball.transform.position);
                 Destroy(ball.gameObject);
                 ballExists = false;
                 return;

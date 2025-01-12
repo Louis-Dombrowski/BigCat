@@ -13,6 +13,7 @@ public class Destructable : MonoBehaviour
     [SerializeField] private float explosionForce = 40;
     [SerializeField] private float randomForce = 10;
     [SerializeField] private float despawnDelay = 30;
+    [SerializeField] private Sfx.ClipId destroySound = Sfx.ClipId.BuildingCrumble;
     
     [Header("State")]
     [SerializeField] private List<Rigidbody> parts = new();
@@ -41,7 +42,7 @@ public class Destructable : MonoBehaviour
         }
     }
 
-    public void Explode(Vector3 direction)
+    public void Explode(Vector3 direction, Vector3 hitPoint)
     {
         if (hasBeenKicked) return; // In case it gets kicked twice in the same physics frame.
         
@@ -66,6 +67,8 @@ public class Destructable : MonoBehaviour
             b.AddComponent<Kickable>();
         }
 
+        Sfx.PlaySound(destroySound, hitPoint);
+        
         Destroy(gameObject, despawnDelay);
     }
 }

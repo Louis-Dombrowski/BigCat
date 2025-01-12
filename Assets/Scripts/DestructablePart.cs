@@ -10,7 +10,7 @@ public class DestructablePart : MonoBehaviour
 		if (other.gameObject.CompareTag("Cat"))
 		{
 			var cat = other.gameObject.GetComponentInParent<CatController>();
-			GetComponentInParent<Destructable>().Explode(cat.ExplosionDirection());
+			GetComponentInParent<Destructable>().Explode(cat.ExplosionDirection(), other.GetContact(0).point);
 		}
 	}
 }
