@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.Http.Headers;
 using NUnit.Framework.Constraints;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -67,7 +68,8 @@ public class Destructable : MonoBehaviour
             b.AddComponent<Kickable>();
         }
 
-        Sfx.PlaySound(destroySound, hitPoint);
+        float volumeMultiplier = Mathf.Log(Mathf.Abs(value) + 1, 1_000_000_000);
+        Sfx.PlaySound(destroySound, hitPoint, volumeMultiplier);
         
         Destroy(gameObject, despawnDelay);
     }

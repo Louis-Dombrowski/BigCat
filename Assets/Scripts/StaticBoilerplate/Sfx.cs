@@ -26,14 +26,14 @@ public class Sfx : MonoBehaviour
 	
 	private static Sfx instance;
 
-	public static void PlaySound(ClipId clipId, Vector3? position = null)
+	public static void PlaySound(ClipId clipId, Vector3? position = null, float volumeMultiplier = 1f)
 	{
 		foreach (var clip in instance.data)
 		{
 			if (clip.id == clipId)
 			{
 				var sound = clip.clips[Random.Range(0, clip.clips.Length)];
-				float soundVolume = instance.volume * clip.volume;
+				float soundVolume = instance.volume * clip.volume * volumeMultiplier;
 				
 				if(position == null) instance.cameraSource.PlayOneShot(sound, soundVolume);
 				else
