@@ -68,7 +68,7 @@ public class Destructable : MonoBehaviour
             b.AddComponent<Kickable>();
         }
 
-        float volumeMultiplier = Mathf.Log(Mathf.Abs(value) + 1, 1_000_000_000);
+        float volumeMultiplier = Mathf.Log(Mathf.Abs(value) + 1, 1_000_000);
         Sfx.PlaySound(destroySound, hitPoint, volumeMultiplier);
         
         Destroy(gameObject, despawnDelay);
