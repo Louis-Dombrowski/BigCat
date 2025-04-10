@@ -103,7 +103,7 @@ public class InputHandler : MonoBehaviour {
 		public CardInputs(InputHandler instance) {
 			ModifyCard = Mathf.CeilToInt(instance.modifyCard.ReadValue<float>());
 			
-			if(ModifyCard != 0) print(ModifyCard);
+			//if(ModifyCard != 0) print(ModifyCard);
 			
 			Interact = instance.interact.ReadValue<float>() > 0;
 		}
