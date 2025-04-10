@@ -364,6 +364,7 @@ GameObject:
   - component: {fileID: 3051288253898413671}
   - component: {fileID: 3995696287106904707}
   - component: {fileID: 1337403691583262226}
+  - component: {fileID: 8461906885431905893}
   m_Layer: 8
   m_Name: BaseCard
   m_TagString: Untagged
@@ -1769,6 +1770,7 @@ MonoBehaviour:
     type: 3}
   prefabSpawnLocation: {fileID: 4190250480362867474}
   target: {fileID: 0}
+  environmental: 0
   prefab: {fileID: 0}
   approx:
     k1: 0.18724109
@@ -1780,8 +1782,36 @@ MonoBehaviour:
   rotApprox:
     approachSpeed: 50
   shouldFollowTarget: 0
+  shouldUpdateCard: 0
   editModeCard: {fileID: 0}
   playModeCard: {fileID: 0}
+--- !u!54 &8461906885431905893
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4861068092981492331}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &5828420893042454037
 GameObject:
   m_ObjectHideFlags: 0

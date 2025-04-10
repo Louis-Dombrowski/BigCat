@@ -58,25 +58,12 @@ public class CardHand : MonoBehaviour
         cameraController = GetComponent<CameraController>();
         
         // Initialize cards in hand
-        // Instantiate them all
         foreach (var set in initialHand)
         {
             for(int i = 0; i < set.count; i++)
             {
-                var card = Instantiate(set.prefab, handParent).GetComponent<Card>();
-                card.transform.name += i; // They need to have distinct names
-                card.approx.Initialize(new Vector2(Mathf.PI / 2, 0)); // dimension 0 is the angular position, dimension 1 is the radial focus position
-                hand.Add(card);
+                DrawCard(set.prefab);
             }
-        }
-        // Spread them out evenly
-        for (int i = 0; i < hand.Count; i++)
-        {
-            var pos = handRange.Lerp(1 - (float)i / (float)(hand.Count - 1));
-            
-            var card = hand[i];
-            card.approx.Initialize(2, new [] { pos, 0 });
-            hand[i] = card;
         }
     }
     
@@ -184,18 +171,23 @@ public class CardHand : MonoBehaviour
                 camera.transform.position,
                 rayDir,
                 out var cardHit,
-                1000f, // Can't be kept small, this looks for cards on terrain outside of the hand as well
+                1000f, // Can't be kept small, this looks for cards outside of the hand (on terrain) as well
                 LayerMask.GetMask("Card"),
                 QueryTriggerInteraction.Ignore
             );
             
             if (mouseHitCard && cardHit.collider.TryGetComponent<Card>(out var card)) // If the mouse found a card
             {
-                hoveredCard = hand.FindIndex((other) => { return card == other; }); // Get its index and make it hover ( * -1 if the card isnt in the hand)
+                hoveredCard = hand.FindIndex((other) => { return card == other; }); // Get its index and make it hover
+                // * (If it's not in the hand, this will return -1, which is already the null value for hoveredCard)
 
                 if (input.Interact && !holdingInteract) // If the user clicks when a card is currently beneath the cursor
                 {
-                    if (hoveredCard == -1) // and the card is not in the hand, pick it up
+                    if (card.environmental)
+                    {
+                        // Dont interact
+                    }
+                    else if (hoveredCard == -1) // and the card is not in the hand, pick it up
                     {
                         heldCard = card;
                         heldCard.shouldUpdateCard = true;
@@ -290,6 +282,23 @@ public class CardHand : MonoBehaviour
         hand.Add(heldCard);
         heldCard = null;
         cursorState = CursorState.Free;
+    }
+
+    public void DrawCard(GameObject prefab)
+    {
+        var card = Instantiate(prefab, handParent).GetComponent<Card>();
+        card.transform.name += $"_{handParent.childCount}"; // cards need to have distinct names
+        hand.Add(card);
+        
+        // Spread out all the cards evenly
+        for (int i = 0; i < hand.Count; i++)
+        {
+            var pos = handRange.Lerp(1 - (float)i / (float)(hand.Count - 1));
+            
+            card = hand[i];
+            card.approx.Initialize(new Vector2(pos, 0)); // dimension 0 is the angular position, dimension 1 is the radial focus position
+            hand[i] = card;
+        }
     }
     
     private void DrawRectInFrontOfCamera(Rect r)

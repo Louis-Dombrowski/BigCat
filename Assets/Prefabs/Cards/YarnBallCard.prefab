@@ -19,6 +19,11 @@ PrefabInstance:
       propertyPath: approx.k2
       value: 0.008764806
       objectReference: {fileID: 0}
+    - target: {fileID: 1337403691583262226, guid: 8faddb03fef64524d81e17eb48e1f979,
+        type: 3}
+      propertyPath: environmental
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1941221312389887178, guid: 8faddb03fef64524d81e17eb48e1f979,
         type: 3}
       propertyPath: m_LocalPosition.x

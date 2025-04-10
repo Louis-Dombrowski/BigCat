@@ -13,14 +13,15 @@ public class Card : MonoBehaviour
     [SerializeField] private Transform prefabSpawnLocation;
     [SerializeField] private Transform target;
     [Header("Properties")]
+    [SerializeField] public bool environmental = false; // If this card is purely decorative
     [SerializeField] private GameObject prefab;
     [SerializeField] public Approximator approx; // initialized externally on prefab instantiation
     [SerializeField] public QuaternionApproximator rotApprox;
     [Header("State")]
     [SerializeField] public bool shouldFollowTarget = false;
     [SerializeField] public bool shouldUpdateCard;
-    [SerializeField] private BaseCard editModeCard;
-    [SerializeField] private BaseCard playModeCard; // Gets copied into the simulation
+    [SerializeField] private BaseCard editModeCard; // A disabled version that's used for edit mode previews
+    [SerializeField] private BaseCard playModeCard; // A dormant version that gets copied into the simulation
 
     private void Start()
     {
@@ -68,6 +69,13 @@ public class Card : MonoBehaviour
     public void SetTarget(Transform t)
     {
         shouldFollowTarget = true;
+
+        if (approx.position.Length != 3)
+        {
+            Debug.LogWarning("Tried to set target of card without a properly initialized approximator");
+            approx.Initialize(transform.position);
+        }
+        
         target.position = t.position;
         target.rotation = t.rotation;
     }
@@ -88,8 +96,8 @@ public class Card : MonoBehaviour
 
     public void EnterHand()
     {
-        Destroy(editModeCard.gameObject);
-        Destroy(playModeCard.gameObject);
+        if(editModeCard != null) Destroy(editModeCard.gameObject);
+        if(editModeCard != null) Destroy(playModeCard.gameObject);
 
         shouldUpdateCard = false;
     }

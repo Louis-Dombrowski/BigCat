@@ -4,6 +4,7 @@ using System.Net.Http.Headers;
 using NUnit.Framework.Constraints;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Serialization;
 
 public class Destructable : MonoBehaviour
@@ -15,10 +16,10 @@ public class Destructable : MonoBehaviour
     [SerializeField] private float randomForce = 10;
     [SerializeField] private float despawnDelay = 30;
     [SerializeField] private Sfx.ClipId destroySound = Sfx.ClipId.BuildingCrumble;
-    
+
     [Header("State")]
     [SerializeField] private List<Rigidbody> parts = new();
-    [SerializeField] private bool hasBeenKicked = false;
+    [SerializeField] public bool hasBeenKicked = false;
     
     // Start is called before the first frame update
     void Start()
