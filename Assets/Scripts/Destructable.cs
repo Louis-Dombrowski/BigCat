@@ -24,10 +24,12 @@ public class Destructable : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        #if UNITY_EDITOR
         if (destroySound == Sfx.ClipId.Null)
         {
             Debug.LogWarning($"Destructable sound not set: {UnityEditor.Search.SearchUtils.GetHierarchyPath(gameObject)}");
         }
+        #endif
         
         var colliders = GetComponentsInChildren<Collider>();
         foreach (var c in colliders)
