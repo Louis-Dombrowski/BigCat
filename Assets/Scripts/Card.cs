@@ -26,7 +26,7 @@ public class Card : MonoBehaviour
     private void Start()
     {
         // Instantiate the target externally, so it isnt a child of this GameObject
-        target = Instantiate(targetPrefab).transform;
+        target = (Instantiate(targetPrefab, gameObject.scene) as GameObject).transform;
         target.name = "TargetOf_" + name;
     }
 

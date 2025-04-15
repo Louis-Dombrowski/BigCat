@@ -17,5 +17,11 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/TestLevel_Reloadable.unity
     guid: 76c4b77847f975045899e4f78580274a
+  - enabled: 1
+    path: Assets/Scenes/TsunamiTransition.unity
+    guid: bf6742c55478ed44da0f240590aaa6fb
+  - enabled: 1
+    path: Assets/Scenes/TitleScreen.unity
+    guid: 7d2bd62bcbe3f604f821cd7e27606ba1
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0
