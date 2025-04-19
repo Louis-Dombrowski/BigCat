@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/TitleScreen.unity
+    guid: 7d2bd62bcbe3f604f821cd7e27606ba1
+  - enabled: 1
     path: Assets/Scenes/DemoLevel.unity
     guid: f7f83edf10d597c4d9a3560e8a3dd305
   - enabled: 1
@@ -20,8 +23,5 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/TsunamiTransition.unity
     guid: bf6742c55478ed44da0f240590aaa6fb
-  - enabled: 1
-    path: Assets/Scenes/TitleScreen.unity
-    guid: 7d2bd62bcbe3f604f821cd7e27606ba1
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0
