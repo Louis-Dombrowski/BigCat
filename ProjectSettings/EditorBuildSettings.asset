@@ -23,5 +23,8 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/TsunamiTransition.unity
     guid: bf6742c55478ed44da0f240590aaa6fb
+  - enabled: 1
+    path: Assets/Scenes/FadeTransition.unity
+    guid: 3182cca8d65251f4bb04f0d9d652f028
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0

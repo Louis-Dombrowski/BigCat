@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using Random = System.Random;
 
@@ -50,13 +51,29 @@ public class ModeSwitcher : MonoBehaviour
 		{
 			foundReloadable |= SceneManager.GetSceneAt(i).name == reloadableName;
 		}
-		if (foundReloadable) await Awaitable.FromAsyncOperation(SceneManager.UnloadSceneAsync(reloadableName));
-		SceneManager.LoadScene(reloadableName, LoadSceneMode.Additive);
-		
-		foreach (var g in instance.editMode) g.SetActive(true);
-		foreach (var g in instance.playMode) g.SetActive(false);
 
-		mode = Mode.Edit;
+		UnityAction closure = () =>
+		{
+			SceneManager.LoadScene(reloadableName, LoadSceneMode.Additive);
+
+			foreach (var g in instance.editMode) g.SetActive(true);
+			foreach (var g in instance.playMode) g.SetActive(false);
+
+			mode = Mode.Edit;
+		};
+
+		if (foundReloadable)
+		{
+			await Awaitable.FromAsyncOperation(SceneManager.LoadSceneAsync("FadeTransition", LoadSceneMode.Additive));
+
+			var transition = FindAnyObjectByType<SceneTransition>();
+			transition.whileHiding.AddListener(async () =>
+			{
+				await Awaitable.FromAsyncOperation(SceneManager.UnloadSceneAsync(reloadableName));
+			});
+			transition.whileHiding.AddListener(closure);
+		}
+		else closure();
 	}
 
 	// When entering play mode from edit mode, the reloadable scene will always be loaded.
