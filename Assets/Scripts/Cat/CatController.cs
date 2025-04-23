@@ -62,6 +62,7 @@ public class CatController : MonoBehaviour
 	[SerializeField] private CatLeg backRightLeg;
 	[SerializeField] private CatLeg backLeftLeg;
 	[SerializeField] private CatLeg frontLeftLeg;
+	[SerializeField] private List<LegIK> rigIK;
 	[Header("Properties")]
 	[SerializeField] private float stepTime = 1f;
 	[SerializeField] private float gallopTime = 0.4f;
@@ -118,10 +119,17 @@ public class CatController : MonoBehaviour
 		// Initialize paw positions
 		var legs = GetComponentsInChildren<CatLeg>();
 		foreach(var l in legs) l.TeleportHome();
+
+		rigIK = new(GetComponentsInChildren<LegIK>());
 	}
 
 	void FixedUpdate()
 	{
+		foreach (var l in rigIK)
+		{
+			l.catDirection = body.rotation;
+		}
+		
 		if (interestState == InterestState.LevelComplete) return;
 		
 		if (interestState == InterestState.Startled) // Begin running
