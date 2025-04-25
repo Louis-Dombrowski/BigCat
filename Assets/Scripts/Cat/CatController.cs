@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Rendering;
 using UnityEngine.Serialization;
 using UnityEngine.UIElements;
@@ -11,8 +12,6 @@ using Util;
 
 public class CatController : MonoBehaviour
 {
-	private delegate void GizmoDrawCall();
-	
 	public enum StepState
 	{
 		Grounded,
@@ -122,7 +121,7 @@ public class CatController : MonoBehaviour
 
 		rigIK = new(GetComponentsInChildren<LegIK>());
 	}
-
+	
 	void FixedUpdate()
 	{
 		foreach (var l in rigIK)
@@ -134,11 +133,15 @@ public class CatController : MonoBehaviour
 		
 		if (interestState == InterestState.Startled) // Begin running
 		{
-			Vector3 runDirection = (body.transform.position - fearSource).normalized;
+			Vector3 runDirection = (head.transform.position - fearSource).normalized;
 			targetDistraction = null;
-			target.position = transform.position + runDirection * runDistance;
+			target.position = fearSource + runDirection * runDistance;
 			recalculatePath = true;
 			interestState = InterestState.Running;
+			gizmoDrawCalls["StartleArrow"] = () =>
+			{
+				ArrowGizmo.Draw(fearSource, runDirection * runDistance, Color.cyan);
+			};
 		}
 		if (interestState == InterestState.Running) // Stop running once you've reached your target
 		{
@@ -172,7 +175,6 @@ public class CatController : MonoBehaviour
 		
 		if (recalculatePath && stepState == StepState.Grounded) // Update the path when the cat isn't in the middle of a step
 		{
-			gizmoDrawCalls.Clear();
 			pathWaypoints = FindPath();
 			recalculatePath = false;
 		}
@@ -441,7 +443,7 @@ public class CatController : MonoBehaviour
 				center = pos + r * centerDirection;
 
 				// Draw turning circle
-				gizmoDrawCalls.Add(() => {
+				gizmoDrawCalls["TurningCircle"] = () => {
 					Vector3[] circlePoints = new Vector3[36];
 					for (int i = 0; i < circlePoints.Length; i++)
 					{
@@ -452,7 +454,7 @@ public class CatController : MonoBehaviour
 					}
 					Gizmos.color = Color.magenta;
 					Gizmos.DrawLineStrip(circlePoints, true);
-				});
+				};
 			}
 			#endregion
 
@@ -513,7 +515,7 @@ public class CatController : MonoBehaviour
 				else options.RemoveAt(1);
 				
 				// Draw all the point candidates in red, and the chosen point in black
-				gizmoDrawCalls.Add(() => {
+				gizmoDrawCalls["TurningCircleCandidatePoints"] = () => {
 					Gizmos.color = Color.red;
 					foreach (var p in possiblePoints)
 					{
@@ -525,7 +527,7 @@ public class CatController : MonoBehaviour
 						Vector2 p = possiblePoints[o] + center;
 						Gizmos.DrawSphere(new(p.x, 2, p.y), 0.1f);
 					}
-				});
+				};
 
 				endpoint = possiblePoints[options[0]];
 			}
@@ -588,22 +590,22 @@ public class CatController : MonoBehaviour
 		List<Vector3> pathPoints = new();
 		pathPoints.Add(new(pos.x, 3, pos.y));
 		foreach(var w in waypoints) pathPoints.Add(new (w.pos.x, 3, w.pos.y));
-		gizmoDrawCalls.Add(() =>
+		gizmoDrawCalls["CatPath"] = () =>
 		{
 			Gizmos.color = Color.yellow;
 			Gizmos.DrawLineStrip(pathPoints.ToArray(), false);
 			Gizmos.color = Color.red;
 			foreach (var p in pathPoints) Gizmos.DrawSphere(p, 0.15f);
-		});
+		};
 		
 		return waypoints;
 	}
 	
-	private List<GizmoDrawCall> gizmoDrawCalls = new();
+	private Dictionary<string, UnityAction> gizmoDrawCalls = new();
 	private void OnDrawGizmos()
 	{
 		if (!Application.isPlaying) return;
 
-		foreach (var c in gizmoDrawCalls) c();
+		foreach (var c in gizmoDrawCalls) c.Value();
 	}
 }
