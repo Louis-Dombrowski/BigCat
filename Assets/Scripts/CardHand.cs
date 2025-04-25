@@ -120,6 +120,9 @@ public class CardHand : MonoBehaviour
             else targetPosition = 1 - currentPoint / (numPoints - 1);
             targetPosition = handRange.Lerp(targetPosition); // remap it within the position range of the hand
             
+            // Compress two cards closer to the center
+            if (numPoints == 2) targetPosition = handRange.Lerp(targetPosition);
+            
             // Update positions:
             var card = hand[i];
             var posData = card.approx.Update(Time.deltaTime, new[] { targetPosition, targetRadius });
