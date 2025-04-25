@@ -111,7 +111,26 @@ public class ModeSwitcher : MonoBehaviour
 	{
 		return instance.mode == Mode.Edit;
 	}
-	
+
+	public async void MainMenu()
+	{
+		// Unpause so the animations can play
+		PauseMenu.instance.OnPause(null);
+		Destroy(PauseMenu.instance); // dont let the player pause during the transition
+		
+		await Awaitable.FromAsyncOperation(SceneManager.LoadSceneAsync("FadeTransition", LoadSceneMode.Additive)); // async so the scene is actually loaded when setting the callback
+		
+		FindAnyObjectByType<SceneTransition>().whileHiding.AddListener(async () =>
+		{
+			// Unload everything before the scene transition, new-to-old so the reloadable scene is deleted first
+			for (int i = SceneManager.loadedSceneCount - 2; i >= 0; i--)
+			{
+				await Awaitable.FromAsyncOperation(SceneManager.UnloadSceneAsync(SceneManager.GetSceneAt(i)));
+			}
+			
+			SceneManager.LoadScene("TitleScreen", LoadSceneMode.Additive);
+		});
+	}
 	public void QuitGame()
 	{
 		Application.Quit();
