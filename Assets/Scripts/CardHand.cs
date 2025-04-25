@@ -296,7 +296,9 @@ public class CardHand : MonoBehaviour
         // Spread out all the cards evenly
         for (int i = 0; i < hand.Count; i++)
         {
-            var pos = handRange.Lerp(1 - (float)i / (float)(hand.Count - 1));
+            float pos;
+            if (hand.Count <= 1) pos = 0.5f;
+            else pos = handRange.Lerp(1 - (float)i / (float)(hand.Count - 1));
             
             card = hand[i];
             card.approx.Initialize(new Vector2(pos, 0)); // dimension 0 is the angular position, dimension 1 is the radial focus position

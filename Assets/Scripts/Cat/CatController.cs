@@ -134,7 +134,7 @@ public class CatController : MonoBehaviour
 		
 		if (interestState == InterestState.Startled) // Begin running
 		{
-			Vector3 runDirection = (transform.position - fearSource).normalized;
+			Vector3 runDirection = (body.transform.position - fearSource).normalized;
 			targetDistraction = null;
 			target.position = transform.position + runDirection * runDistance;
 			recalculatePath = true;
